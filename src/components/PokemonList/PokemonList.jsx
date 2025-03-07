@@ -5,22 +5,33 @@ import Pokemon from '../Pokemon/Pokemon';
 function PokemonList(){
 
 
-    const [pokedexUrl,setPokedexUrl]=useState('https://pokeapi.co/api/v2/pokemon/');
-    const[pokemonList,setPokemonList]=useState([]);
-    const[isLoading, setIsloading]=useState(true);
+   // const [pokedexUrl,setPokedexUrl]=useState('https://pokeapi.co/api/v2/pokemon/');
+  //  const[pokemonList,setPokemonList]=useState([]);
+  //  const[isLoading, setIsloading]=useState(true);
 
-    const[nextUrl,setNextUrl]=useState('');
-    const [prevUrl,setPrevUrl]=useState('');
-
+  //  const[nextUrl,setNextUrl]=useState('');
+  //  const [prevUrl,setPrevUrl]=useState('');
+const [pokemonListState,setPokemonListState]=useState({
+    pokemonList:[],
+    isLoading:true,
+    pokedexUrl:'https://pokeapi.co/api/v2/pokemon/',
+    nextUrl:'',
+    prevUrl:''
+});
 async function downloadPokemon(){
-    setIsloading(true);
-    const response= await axios.get(pokedexUrl);
+   // setIsloading(true);
+   setPokemonListState((state)=>({...state,isLoading: true}));
+    const response= await axios.get(pokemonListState.pokedexUrl);
     
         const pokemonResults= response.data.results;
         
         console.log(response.data);
-        setNextUrl(response.data.next);
-        setPrevUrl(response.data.previous);
+        setPokemonListState((state)=>({
+            ...state,
+            nextUrl:response.data.next,
+            prevUrl:response.data.previous
+        }));
+       
         console.log(pokemonResults);
 
         const pokemonResultPromise=pokemonResults.map((pokemon)=>axios.get(pokemon.url));
@@ -37,13 +48,17 @@ async function downloadPokemon(){
             }
         }));
         console.log(pokeListResult);
-        setPokemonList(pokeListResult);
-        setIsloading(false);
+        setPokemonListState((state)=>({
+            ...state,
+            pokemonList:pokeListResult,
+            isLoading:false
+        }));
+        
 }
     useEffect(()=>{
         downloadPokemon();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[pokedexUrl]);
+    },[pokemonListState.pokedexUrl]);
 
     
 
@@ -58,7 +73,7 @@ async function downloadPokemon(){
                 </div><br />
             
                 <div className="pokemon-wrapper">
-                {(isLoading)? 'Loading..':pokemonList.map((p)=><Pokemon 
+                {(pokemonListState.isLoading)? 'Loading..':pokemonListState.pokemonList.map((p)=><Pokemon 
                 name={p.name}
                  image={p.image} 
                  key={p.id} 
@@ -68,10 +83,14 @@ async function downloadPokemon(){
                 </div>
                      
                 <div className="controls">
-                        <button disabled={prevUrl==undefined} onClick={()=> setPokedexUrl(prevUrl)}>Prev</button>
+                        <button disabled={pokemonListState.prevUrl==undefined} onClick={()=> {
+                            const UrlToSet= pokemonListState.prevUrl;
+                            setPokemonListState({...pokemonListState,pokedexUrl:UrlToSet})}}>Prev</button>
                         <button disabled={
-                            nextUrl== undefined
-                        } onClick={()=> setPokedexUrl(nextUrl)}>Next</button>
+                            pokemonListState.nextUrl== undefined
+                        } onClick={()=> { 
+                            const UrlToSet= pokemonListState.nextUrl;
+                            setPokemonListState({...pokemonListState,pokedexUrl:UrlToSet})}}>Next</button>
                      </div>
                
             </div>
