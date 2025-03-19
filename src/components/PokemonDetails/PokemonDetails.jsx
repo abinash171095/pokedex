@@ -4,11 +4,11 @@ import './PokemonDetails.css'
 
 import usePokemonDetails from "../../hooks/usePokemonDetails";
 
-function PokemonDetails(){
+function PokemonDetails({pokemonName}){
 
    
     const {id}=useParams();
-    const[pokemon,pokemonListState]=usePokemonDetails(id);
+    const[pokemon]=usePokemonDetails(id, pokemonName);
     
 
     return(
@@ -34,7 +34,7 @@ function PokemonDetails(){
                         <div>
                             more {pokemon.types[0]} type pokemons
                             <ul>
-                           { pokemon.similarPokemons.map((p)=><li key={p.pokemon.id}>{p.pokemon.name}</li>)}
+                           { pokemon.similarPokemons.map((p)=><li key={p.pokemon.url}>{p.pokemon.name}</li>)}
                             </ul>
                         </div>
                     }
